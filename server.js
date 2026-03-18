@@ -73,10 +73,22 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // ── Contact form endpoint ───────────────────────────────────────────────────
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+  console.log('Resend email service initialized');
+} else {
+  console.warn('WARNING: RESEND_API_KEY not set — contact form emails will not be sent');
+}
 
 app.post('/api/contact', async (req, res) => {
   console.log('[Contact] Received submission');
+
+  if (!resend) {
+    console.error('[Contact] Resend not configured — RESEND_API_KEY is missing');
+    return res.status(500).json({ error: 'Email service is not configured. Please contact us directly.' });
+  }
+
   const { firstName, lastName, email, phone, company, services, message } = req.body;
 
   if (!firstName || !email || !message) {
