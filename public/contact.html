@@ -543,29 +543,56 @@ function togglePill(el) {
   el.classList.toggle('selected');
 }
 
-function handleSubmit(e) {
+async function handleSubmit(e) {
   e.preventDefault();
   const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
   const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const company = document.getElementById('company').value.trim();
   const message = document.getElementById('message').value.trim();
+  const services = Array.from(document.querySelectorAll('.service-pill.selected')).map(p => p.textContent.trim());
 
   if (!firstName || !email || !message) {
-    // Inline validation — highlight missing fields
     if (!firstName) document.getElementById('firstName').style.borderColor = '#c8410a';
     if (!email)     document.getElementById('email').style.borderColor = '#c8410a';
     if (!message)   document.getElementById('message').style.borderColor = '#c8410a';
     return;
   }
 
-  // Show success screen
-  const form = document.getElementById('contactForm');
-  form.innerHTML = `
-    <div style="text-align:center;padding:3rem 1rem;">
-      <div style="width:64px;height:64px;border-radius:50%;background:rgba(10,35,66,0.07);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:1.8rem;">✓</div>
-      <h2 style="font-family:'Fraunces',Georgia,serif;font-size:1.6rem;font-weight:700;color:#0a2342;margin-bottom:0.75rem;">Message Received</h2>
-      <p style="color:#4a5568;font-size:0.95rem;line-height:1.7;max-width:380px;margin:0 auto 2rem;">Thanks ${firstName} — we'll review your message and get back to you at <strong>${email}</strong> within 1 business day.</p>
-      <a href="/" style="display:inline-block;background:#0a2342;color:#fff;padding:0.75rem 2rem;border-radius:8px;text-decoration:none;font-size:0.875rem;font-weight:600;">Back to Home</a>
-    </div>`;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = 'Sending...';
+
+  try {
+    const res = await fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName, lastName, email, phone, company, services, message }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      btn.disabled = false;
+      btn.innerHTML = 'Send Message &rarr;';
+      alert(data.error || 'Something went wrong. Please try again.');
+      return;
+    }
+
+    const form = document.getElementById('contactForm');
+    form.innerHTML = `
+      <div style="text-align:center;padding:3rem 1rem;">
+        <div style="width:64px;height:64px;border-radius:50%;background:rgba(10,35,66,0.07);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:1.8rem;">&#10003;</div>
+        <h2 style="font-family:'Fraunces',Georgia,serif;font-size:1.6rem;font-weight:700;color:#0a2342;margin-bottom:0.75rem;">Message Sent</h2>
+        <p style="color:#4a5568;font-size:0.95rem;line-height:1.7;max-width:380px;margin:0 auto 2rem;">Thanks ${firstName} — we'll review your message and get back to you at <strong>${email}</strong> within 1 business day.</p>
+        <a href="/" style="display:inline-block;background:#0a2342;color:#fff;padding:0.75rem 2rem;border-radius:8px;text-decoration:none;font-size:0.875rem;font-weight:600;">Back to Home</a>
+      </div>`;
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Send Message &rarr;';
+    alert('Network error. Please check your connection and try again.');
+  }
 }
 </script>
 </body>

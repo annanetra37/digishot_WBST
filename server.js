@@ -1,5 +1,6 @@
 const express    = require('express');
 const compression = require('compression');
+const nodemailer = require('nodemailer');
 const path       = require('path');
 const fs         = require('fs');
 
@@ -57,6 +58,57 @@ app.use((req, res, next) => {
     return res.redirect(301, clean + qs);
   }
   next();
+});
+
+// ── JSON body parser ────────────────────────────────────────────────────────
+app.use(express.json());
+
+// ── Contact form endpoint ───────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.office365.com',
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+app.post('/api/contact', async (req, res) => {
+  const { firstName, lastName, email, phone, company, services, message } = req.body;
+
+  if (!firstName || !email || !message) {
+    return res.status(400).json({ error: 'First name, email, and message are required.' });
+  }
+
+  const selectedServices = Array.isArray(services) ? services.join(', ') : (services || 'None');
+
+  const htmlBody = `
+    <h2>New Contact Form Submission</h2>
+    <table style="border-collapse:collapse;width:100%;max-width:600px;">
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Name</td><td style="padding:8px;border-bottom:1px solid #eee;">${firstName} ${lastName || ''}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Email</td><td style="padding:8px;border-bottom:1px solid #eee;"><a href="mailto:${email}">${email}</a></td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Phone</td><td style="padding:8px;border-bottom:1px solid #eee;">${phone || 'Not provided'}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Company</td><td style="padding:8px;border-bottom:1px solid #eee;">${company || 'Not provided'}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Services</td><td style="padding:8px;border-bottom:1px solid #eee;">${selectedServices}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Message</td><td style="padding:8px;border-bottom:1px solid #eee;">${message}</td></tr>
+    </table>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: 'megh1_hri@hotmail.com, mherdavidian@hotmail.com',
+      replyTo: email,
+      subject: `New Inquiry from ${firstName} ${lastName || ''} — Digishot Contact Form`,
+      html: htmlBody,
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Email send error:', err);
+    res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+  }
 });
 
 // ── Static files with cache headers ─────────────────────────────────────────
