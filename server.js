@@ -11,6 +11,15 @@ const PUBLIC = path.join(__dirname, 'public');
 // ── Gzip compression ────────────────────────────────────────────────────────
 app.use(compression());
 
+// ── Request logging ─────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    console.log(`${req.method} ${req.url} ${res.statusCode} ${Date.now() - start}ms`);
+  });
+  next();
+});
+
 // ── Security & SEO headers ───────────────────────────────────────────────────
 app.use((req, res, next) => {
   // Tell browsers this site should only be served over HTTPS
@@ -65,23 +74,33 @@ app.use(express.json());
 
 // ── Contact form endpoint ───────────────────────────────────────────────────
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.office365.com',
+  host: process.env.SMTP_HOST || 'smtp-mail.outlook.com',
   port: Number(process.env.SMTP_PORT) || 587,
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    ciphers: 'SSLv3',
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 app.post('/api/contact', async (req, res) => {
+  console.log('[Contact] Received submission');
   const { firstName, lastName, email, phone, company, services, message } = req.body;
 
   if (!firstName || !email || !message) {
+    console.log('[Contact] Validation failed — missing fields');
     return res.status(400).json({ error: 'First name, email, and message are required.' });
   }
 
   const selectedServices = Array.isArray(services) ? services.join(', ') : (services || 'None');
+  console.log(`[Contact] From: ${firstName} ${lastName || ''} <${email}> — Services: ${selectedServices}`);
 
   const htmlBody = `
     <h2>New Contact Form Submission</h2>
@@ -96,6 +115,7 @@ app.post('/api/contact', async (req, res) => {
   `;
 
   try {
+    console.log('[Contact] Sending email...');
     await transporter.sendMail({
       from: process.env.SMTP_USER,
       to: 'megh1_hri@hotmail.com, mherdavidian@hotmail.com',
@@ -104,9 +124,11 @@ app.post('/api/contact', async (req, res) => {
       html: htmlBody,
     });
 
+    console.log('[Contact] Email sent successfully');
     res.json({ success: true });
   } catch (err) {
-    console.error('Email send error:', err);
+    console.error('[Contact] Email send error:', err.message);
+    console.error('[Contact] Full error:', err);
     res.status(500).json({ error: 'Failed to send message. Please try again later.' });
   }
 });
