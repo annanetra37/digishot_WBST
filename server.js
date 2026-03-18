@@ -40,6 +40,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   if (
     process.env.NODE_ENV === 'production' &&
+    req.headers['x-forwarded-proto'] &&
     req.headers['x-forwarded-proto'] !== 'https'
   ) {
     return res.redirect(301, `https://${req.headers.host}${req.url}`);
@@ -135,7 +136,7 @@ app.use((req, res) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Digishot running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
