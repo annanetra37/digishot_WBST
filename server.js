@@ -115,7 +115,7 @@ app.post('/api/contact', async (req, res) => {
     console.log('[Contact] Sending email via Resend...');
     const { data, error } = await resend.emails.send({
       from: 'Digishot Contact <onboarding@resend.dev>',
-      to: ['megh1_hri@hotmail.com', 'mherdavidian@hotmail.com'],
+      to: ['digishotio@gmail.com'],
       replyTo: email,
       subject: `New Inquiry from ${firstName} ${lastName || ''} — Digishot Contact Form`,
       html: htmlBody,
