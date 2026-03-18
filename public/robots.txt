@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Disallow admin or private paths (add as needed)
+Disallow: /admin/
+Disallow: /private/
+Disallow: /api/
+
+# Crawl-delay for courtesy
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://digishot.io/sitemap.xml
