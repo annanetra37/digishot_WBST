@@ -1,6 +1,6 @@
 const express    = require('express');
 const compression = require('compression');
-const nodemailer = require('nodemailer');
+const { Resend }  = require('resend');
 const path       = require('path');
 const fs         = require('fs');
 
@@ -73,22 +73,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 
 // ── Contact form endpoint ───────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp-mail.outlook.com',
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-  tls: {
-    ciphers: 'SSLv3',
-    rejectUnauthorized: false,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.post('/api/contact', async (req, res) => {
   console.log('[Contact] Received submission');
@@ -115,20 +100,24 @@ app.post('/api/contact', async (req, res) => {
   `;
 
   try {
-    console.log('[Contact] Sending email...');
-    await transporter.sendMail({
-      from: process.env.SMTP_USER,
-      to: 'megh1_hri@hotmail.com, mherdavidian@hotmail.com',
+    console.log('[Contact] Sending email via Resend...');
+    const { data, error } = await resend.emails.send({
+      from: 'Digishot Contact <onboarding@resend.dev>',
+      to: ['megh1_hri@hotmail.com', 'mherdavidian@hotmail.com'],
       replyTo: email,
       subject: `New Inquiry from ${firstName} ${lastName || ''} — Digishot Contact Form`,
       html: htmlBody,
     });
 
-    console.log('[Contact] Email sent successfully');
+    if (error) {
+      console.error('[Contact] Resend error:', error);
+      return res.status(500).json({ error: 'Failed to send message. Please try again later.' });
+    }
+
+    console.log('[Contact] Email sent successfully, id:', data?.id);
     res.json({ success: true });
   } catch (err) {
     console.error('[Contact] Email send error:', err.message);
-    console.error('[Contact] Full error:', err);
     res.status(500).json({ error: 'Failed to send message. Please try again later.' });
   }
 });
