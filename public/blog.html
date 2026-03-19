@@ -67,7 +67,7 @@
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+37441677332",
-      "email": "digishotio@hotmail.com",
+      "email": "digishotio@gmail.com",
       "contactType": "customer service"
     }
   },
@@ -1294,11 +1294,11 @@ footer {
         </ul>
       </div>
 
-      <div class="newsletter-card">
+      <div class="newsletter-card" id="newsletterCard">
         <h3 itemprop="headline">Stay Sharp</h3>
         <p>Get our latest insights on digital marketing and SEO delivered to your inbox. No fluff.</p>
-        <input type="email" class="newsletter-input" placeholder="your@email.com" aria-label="Email address for newsletter">
-        <button class="newsletter-btn">Subscribe →</button>
+        <input type="email" class="newsletter-input" id="newsletterEmail" placeholder="your@email.com" aria-label="Email address for newsletter">
+        <button class="newsletter-btn" id="newsletterBtn" onclick="handleSubscribe()">Subscribe &rarr;</button>
         <p class="newsletter-note">No spam. Unsubscribe any time.</p>
       </div>
 
@@ -1337,7 +1337,7 @@ footer {
         <div class="f-address">
           24 Gogol St<br>
           Yerevan 0069, Armenia<br>
-          digishotio@hotmail.com &nbsp;·&nbsp; +374 41 677332
+          <a href="/contact" style="color:inherit;text-decoration:underline;">Contact Us</a> &nbsp;·&nbsp; +374 41 677332
         </div>
       </div>
       <div class="footer-col">
@@ -1572,6 +1572,44 @@ function toggleFeatured() {
 // ── Init ─────────────────────────────────────────────────────────────────
 syncSidebarTopic('all');
 applyFilter('all');
+
+// ── Newsletter subscribe ──────────────────────────────────────────────
+async function handleSubscribe() {
+  const emailInput = document.getElementById('newsletterEmail');
+  const btn = document.getElementById('newsletterBtn');
+  const email = emailInput.value.trim();
+
+  if (!email || !email.includes('@')) {
+    emailInput.style.borderColor = '#c8410a';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    const res = await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!res.ok) {
+      btn.disabled = false;
+      btn.innerHTML = 'Subscribe &rarr;';
+      alert('Something went wrong. Please try again.');
+      return;
+    }
+
+    btn.innerHTML = '&#10003; Subscribed!';
+    btn.style.background = '#0a2342';
+    emailInput.disabled = true;
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Subscribe &rarr;';
+    alert('Network error. Please try again.');
+  }
+}
 </script>
 
 </body>
