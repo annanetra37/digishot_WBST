@@ -56,7 +56,7 @@
   "logo": "https://digishot.io/logo.png",
   "image": "https://digishot.io/og-image.jpg",
   "telephone": "+37441677332",
-  "email": "digishotio@hotmail.com",
+  "email": "digishotio@gmail.com",
   "foundingDate": "2020",
   "address": {
     "@type": "PostalAddress",
@@ -1922,17 +1922,17 @@ footer {
         <div class="trust-chip">100% confidential</div>
       </div>
     </div>
-    <div class="cta-form">
+    <div class="cta-form" id="strategyForm">
       <div class="form-2col">
-        <div class="form-field"><label>First Name</label><input type="text" placeholder="John"></div>
-        <div class="form-field"><label>Last Name</label><input type="text" placeholder="Smith"></div>
+        <div class="form-field"><label>First Name</label><input type="text" id="stratFirstName" placeholder="John"></div>
+        <div class="form-field"><label>Last Name</label><input type="text" id="stratLastName" placeholder="Smith"></div>
       </div>
-      <div class="form-field"><label>Business Email</label><input type="email" placeholder="john@company.com"></div>
-      <div class="form-field"><label>Company & Website</label><input type="text" placeholder="Acme Inc &#8212; acme.com"></div>
+      <div class="form-field"><label>Business Email</label><input type="email" id="stratEmail" placeholder="john@company.com"></div>
+      <div class="form-field"><label>Company & Website</label><input type="text" id="stratCompany" placeholder="Acme Inc &#8212; acme.com"></div>
       <div class="form-field">
         <label>Primary Goal</label>
-        <select>
-          <option value="" disabled selected>Select your main objectiveu2026</option>
+        <select id="stratGoal">
+          <option value="" disabled selected>Select your main objective&#8230;</option>
           <option>New Website / Redesign</option>
           <option>SEO & Organic Growth</option>
           <option>AI Chatbot / Automation</option>
@@ -1942,13 +1942,56 @@ footer {
           <option>Brand Identity</option>
         </select>
       </div>
-      <button class="submit-btn" onclick="this.innerHTML='&#10003; &nbsp;Request Received &#8212; We\'ll be in touch within 24h'; this.style.background='#0a2342'; this.disabled=true;">
+      <button class="submit-btn" id="stratBtn" onclick="handleStrategy()">
         Request Free Strategy Session &#8594;
       </button>
       <p class="form-note">&#128274; Your information is 100% confidential and never shared. By submitting you agree to our Privacy Policy.</p>
     </div>
   </div>
 </div>
+
+<script>
+async function handleStrategy() {
+  var firstName = document.getElementById('stratFirstName').value.trim();
+  var lastName = document.getElementById('stratLastName').value.trim();
+  var email = document.getElementById('stratEmail').value.trim();
+  var company = document.getElementById('stratCompany').value.trim();
+  var goalEl = document.getElementById('stratGoal');
+  var goal = goalEl.options[goalEl.selectedIndex] && goalEl.selectedIndex > 0 ? goalEl.options[goalEl.selectedIndex].text : '';
+  var btn = document.getElementById('stratBtn');
+
+  if (!firstName || !email) {
+    if (!firstName) document.getElementById('stratFirstName').style.borderColor = '#c8410a';
+    if (!email) document.getElementById('stratEmail').style.borderColor = '#c8410a';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    var res = await fetch('/api/strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName: firstName, lastName: lastName, email: email, company: company, goal: goal }),
+    });
+
+    if (!res.ok) {
+      btn.disabled = false;
+      btn.innerHTML = 'Request Free Strategy Session \u2192';
+      alert('Something went wrong. Please try again.');
+      return;
+    }
+
+    btn.innerHTML = '\u2713 \u00a0Request Received \u2014 We\u2019ll be in touch within 24h';
+    btn.style.background = '#0a2342';
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Request Free Strategy Session \u2192';
+    alert('Network error. Please try again.');
+  }
+}
+</script>
 
 <!-- FOOTER -->
 </main>
@@ -1961,7 +2004,7 @@ footer {
         <div class="f-address">
           24 Gogol St<br>
           Yerevan 0069, Armenia<br>
-          digishotio@hotmail.com &nbsp;&#183;&nbsp; +374 41 677332
+          <a href="/contact" style="color:inherit;text-decoration:underline;">Contact Us</a> &nbsp;&#183;&nbsp; +374 41 677332
         </div>
       </div>
       <div class="footer-col">

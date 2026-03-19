@@ -134,6 +134,99 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// ── Newsletter subscribe endpoint ────────────────────────────────────────
+app.post('/api/subscribe', async (req, res) => {
+  console.log('[Subscribe] Received submission');
+
+  if (!resend) {
+    console.error('[Subscribe] Resend not configured — RESEND_API_KEY is missing');
+    return res.status(500).json({ error: 'Email service is not configured.' });
+  }
+
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  const htmlBody = `
+    <h2>New Newsletter Subscriber</h2>
+    <p>A new visitor has subscribed to the Digishot newsletter.</p>
+    <table style="border-collapse:collapse;width:100%;max-width:600px;">
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Email</td><td style="padding:8px;border-bottom:1px solid #eee;"><a href="mailto:${email}">${email}</a></td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Date</td><td style="padding:8px;border-bottom:1px solid #eee;">${new Date().toISOString()}</td></tr>
+    </table>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Digishot Newsletter <onboarding@resend.dev>',
+      to: ['digishotio@gmail.com'],
+      replyTo: email,
+      subject: `New Newsletter Subscriber: ${email}`,
+      html: htmlBody,
+    });
+
+    if (error) {
+      console.error('[Subscribe] Resend error:', error);
+      return res.status(500).json({ error: 'Failed to process subscription.' });
+    }
+
+    console.log('[Subscribe] Notification sent, id:', data?.id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Subscribe] Error:', err.message);
+    res.status(500).json({ error: 'Failed to process subscription.' });
+  }
+});
+
+// ── Strategy session request endpoint ────────────────────────────────────
+app.post('/api/strategy', async (req, res) => {
+  console.log('[Strategy] Received submission');
+
+  if (!resend) {
+    console.error('[Strategy] Resend not configured — RESEND_API_KEY is missing');
+    return res.status(500).json({ error: 'Email service is not configured.' });
+  }
+
+  const { firstName, lastName, email, company, goal } = req.body;
+
+  if (!firstName || !email) {
+    return res.status(400).json({ error: 'First name and email are required.' });
+  }
+
+  const htmlBody = `
+    <h2>New Strategy Session Request</h2>
+    <table style="border-collapse:collapse;width:100%;max-width:600px;">
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Name</td><td style="padding:8px;border-bottom:1px solid #eee;">${firstName} ${lastName || ''}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Email</td><td style="padding:8px;border-bottom:1px solid #eee;"><a href="mailto:${email}">${email}</a></td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Company</td><td style="padding:8px;border-bottom:1px solid #eee;">${company || 'Not provided'}</td></tr>
+      <tr><td style="padding:8px;font-weight:bold;border-bottom:1px solid #eee;">Primary Goal</td><td style="padding:8px;border-bottom:1px solid #eee;">${goal || 'Not selected'}</td></tr>
+    </table>
+  `;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Digishot Strategy <onboarding@resend.dev>',
+      to: ['digishotio@gmail.com'],
+      replyTo: email,
+      subject: `Strategy Session Request from ${firstName} ${lastName || ''} — Digishot`,
+      html: htmlBody,
+    });
+
+    if (error) {
+      console.error('[Strategy] Resend error:', error);
+      return res.status(500).json({ error: 'Failed to send request.' });
+    }
+
+    console.log('[Strategy] Email sent, id:', data?.id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Strategy] Error:', err.message);
+    res.status(500).json({ error: 'Failed to send request.' });
+  }
+});
+
 // ── Static files with cache headers ─────────────────────────────────────────
 app.use(express.static(PUBLIC, {
   // HTML files: no cache (always revalidate)
