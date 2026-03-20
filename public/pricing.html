@@ -170,7 +170,8 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
 .nav-links a { color: var(--gray); text-decoration: none; font-size: 0.875rem; font-weight: 500; padding: 0.45rem 0.85rem; border-radius: 6px; transition: all 0.2s; }
 .nav-links a:hover { background: rgba(10,35,66,0.06); color: var(--navy); }
 .nav-links a.active { background: rgba(200,65,10,0.07); color: var(--rust); font-weight: 600; }
-.nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+.nav-actions { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
+.mobile-only { display: none; }
 /* Hamburger menu button */
 .nav-hamburger {
   display: none;
@@ -206,16 +207,21 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--paper);
+  background: #faf9f6;
   z-index: 1000;
   align-items: center;
   justify-content: center;
   gap: 1rem;
   padding: 2rem;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.3);
 }
+.nav-links.mobile-open li { list-style: none; }
+.nav-links.mobile-open .mobile-only { display: list-item; }
 .nav-links.mobile-open a {
   font-size: 1.25rem;
   padding: 0.75rem 1.5rem;
+  color: var(--navy);
+  font-weight: 600;
 }
 .btn-outline-sm { padding: 0.5rem 1.1rem; border: 1px solid var(--border2); color: var(--gray); border-radius: 8px; font-size: 0.825rem; font-weight: 500; text-decoration: none; transition: all 0.2s; }
 .btn-outline-sm:hover { border-color: var(--navy); color: var(--navy); }
@@ -513,6 +519,7 @@ footer { background: #0d1117; border-top: 1px solid rgba(255,255,255,0.06); padd
     <li><a href="/#industries">Industries</a></li>
     <li><a href="/about">About Us</a></li>
     <li><a href="/blog">Blog</a></li>
+    <li class="mobile-only"><a href="/contact">Contact Us</a></li>
   </ul>
   <div class="nav-actions">
     <a href="/contact" class="btn-outline-sm">Contact Us</a>
