@@ -285,6 +285,53 @@ body {
 
 .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
 
+/* Hamburger menu button */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 1001;
+}
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--navy);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+.nav-hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.nav-hamburger.active span:nth-child(2) { opacity: 0; }
+.nav-hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* Mobile nav overlay */
+.nav-links.mobile-open {
+  display: flex !important;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--paper);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+.nav-links.mobile-open a {
+  font-size: 1.25rem;
+  padding: 0.75rem 1.5rem;
+}
+
 .btn-outline-sm {
   padding: 0.5rem 1.1rem;
   border: 1px solid var(--border2);
@@ -1373,6 +1420,7 @@ footer {
 @media (max-width: 1100px) {
   .navbar { padding: 0 1.5rem; }
   .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
   .section, .section-full { padding: 5rem 1.5rem; }
   .services-grid { grid-template-columns: repeat(2, 1fr); }
   .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 2rem; }
@@ -1426,6 +1474,9 @@ footer {
   </ul>
   <div class="nav-actions">
     <a href="/contact" class="btn-outline-sm">Contact Us</a>
+    <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
@@ -1501,12 +1552,12 @@ footer {
         <ul class="price-features">
           <li><span class="price-check">&#10003;</span> Custom landing page design</li>
           <li><span class="price-check">&#10003;</span> Mobile-responsive build</li>
-          <li><span class="price-check">&#10003;</span> Free listing on Zontik.com business page</li>
+          <li><span class="price-check">&#10003;</span> Free listing on Zontik.am business page</li>
           <li><span class="price-check">&#10003;</span> Dedicated project manager</li>
           <li><span class="price-check">&#10003;</span> Customer support 24/7</li>
         </ul>
         <div class="price-zontik">
-          <strong>&#128640; Included: Zontik.com Listing</strong>
+          <strong>&#128640; Included: Zontik.am Listing</strong>
           Where SMEs can be discovered without competing against giant ad budgets — and where people can find authentic, local alternatives to big-box brands. No algorithms. No paid placements. Just great businesses, listed fairly.
         </div>
         <a href="#contact" class="price-cta">Get Started &rarr;</a>
@@ -1527,12 +1578,12 @@ footer {
           <li><span class="price-check">&#10003;</span> Custom full website design</li>
           <li><span class="price-check">&#10003;</span> All pages, mobile-responsive</li>
           <li><span class="price-check">&#10003;</span> E-commerce integration</li>
-          <li><span class="price-check">&#10003;</span> Free listing on Zontik.com business page</li>
+          <li><span class="price-check">&#10003;</span> Free listing on Zontik.am business page</li>
           <li><span class="price-check">&#10003;</span> Priority support & reporting</li>
           <li><span class="price-check">&#10003;</span> Customer support 24/7</li>
         </ul>
         <div class="price-zontik">
-          <strong>&#128640; Included: Zontik.com Listing</strong>
+          <strong>&#128640; Included: Zontik.am Listing</strong>
           Where SMEs can be discovered without competing against giant ad budgets — and where people can find authentic, local alternatives to big-box brands. No algorithms. No paid placements. Just great businesses, listed fairly.
         </div>
         <a href="#contact" class="price-cta">Get Started &rarr;</a>
@@ -1557,12 +1608,12 @@ footer {
           <li><span class="price-check">&#10003;</span> Market trend analysis</li>
           <li><span class="price-check">&#10003;</span> Monthly campaign planning</li>
           <li><span class="price-check">&#10003;</span> 12 posts for Instagram &amp; Facebook / mo</li>
-          <li><span class="price-check">&#10003;</span> Free featured listing on Zontik.com</li>
+          <li><span class="price-check">&#10003;</span> Free featured listing on Zontik.am</li>
           <li><span class="price-check">&#10003;</span> Monthly analytics & strategy review</li>
           <li><span class="price-check">&#10003;</span> Customer support 24/7</li>
         </ul>
         <div class="price-zontik">
-          <strong>&#128640; Included: Zontik.com Listing</strong>
+          <strong>&#128640; Included: Zontik.am Listing</strong>
           Where SMEs can be discovered without competing against giant ad budgets — and where people can find authentic, local alternatives to big-box brands. No algorithms. No paid placements. Just great businesses, listed fairly.
         </div>
         <a href="#contact" class="price-cta">Get Started &rarr;</a>
@@ -1961,6 +2012,27 @@ footer {
 </div>
 
 <script>
+/* ── MOBILE HAMBURGER MENU ── */
+(function() {
+  const btn = document.querySelector('.nav-hamburger');
+  const nav = document.querySelector('.nav-links');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function() {
+    const open = nav.classList.toggle('mobile-open');
+    btn.classList.toggle('active', open);
+    btn.setAttribute('aria-expanded', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  });
+  nav.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      nav.classList.remove('mobile-open');
+      btn.classList.remove('active');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    });
+  });
+})();
+
 async function handleStrategy() {
   var firstName = document.getElementById('stratFirstName').value.trim();
   var lastName = document.getElementById('stratLastName').value.trim();
