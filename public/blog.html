@@ -305,6 +305,53 @@ body {
 }
 .btn-outline-sm:hover { border-color: var(--navy); color: var(--navy); }
 
+/* Hamburger menu button */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 1001;
+}
+.nav-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--navy);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+.nav-hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.nav-hamburger.active span:nth-child(2) { opacity: 0; }
+.nav-hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+/* Mobile nav overlay */
+.nav-links.mobile-open {
+  display: flex !important;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--paper);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+}
+.nav-links.mobile-open a {
+  font-size: 1.25rem;
+  padding: 0.75rem 1.5rem;
+}
+
 /* ═══ HERO ═══ */
 .blog-hero {
   background: var(--navy);
@@ -710,6 +757,8 @@ footer {
 .post-collapse-btn:hover { background: var(--navy); color: #fff; }
 
 @media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-hamburger { display: flex; }
   .post-expand-inner { padding: 1.5rem; }
 }
 
@@ -735,6 +784,9 @@ footer {
   </ul>
   <div class="nav-actions">
     <a href="/contact" class="btn-outline-sm">Contact Us</a>
+    <button class="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
 
@@ -1215,7 +1267,7 @@ footer {
               <h3 itemprop="headline">Armenian-language keywords</h3>
               <p>Many businesses ignore Armenian-script keywords entirely. This is a significant missed opportunity — users searching in Armenian face less competition, and Google treats Armenian-language content as a strong local signal. At minimum, write your GBP description and at least two website pages in Armenian alongside the English versions.</p>
               <h3 itemprop="headline">Local citations: NAP consistency</h3>
-              <p>NAP — Name, Address, Phone — must be identical everywhere it appears: your website, GBP, Zontik.com, local directories, social profiles. Even small discrepancies (with vs. without the street number, different phone formats) dilute your local authority. Run a citation audit annually.</p>
+              <p>NAP — Name, Address, Phone — must be identical everywhere it appears: your website, GBP, Zontik.am, local directories, social profiles. Even small discrepancies (with vs. without the street number, different phone formats) dilute your local authority. Run a citation audit annually.</p>
               <h3 itemprop="headline">Review strategy</h3>
               <p>Google reviews are a direct local ranking factor. Build a simple system: after every successful transaction, send a short message asking for a review with a direct link to your GBP review form. Respond to every review — positive and negative. Businesses with 50+ reviews and active owner responses consistently outrank competitors with better technical SEO but silent review profiles.</p>
               <h3 itemprop="headline">Local link building</h3>
@@ -1381,6 +1433,27 @@ footer {
 </footer>
 
 <script>
+/* ── MOBILE HAMBURGER MENU ── */
+(function() {
+  const btn = document.querySelector('.nav-hamburger');
+  const nav = document.querySelector('.nav-links');
+  if (!btn || !nav) return;
+  btn.addEventListener('click', function() {
+    const open = nav.classList.toggle('mobile-open');
+    btn.classList.toggle('active', open);
+    btn.setAttribute('aria-expanded', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  });
+  nav.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      nav.classList.remove('mobile-open');
+      btn.classList.remove('active');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    });
+  });
+})();
+
 // ── Category map: filter key → data-cats values that match ──────────────
 const CAT_MAP = {
   'all':       null,
