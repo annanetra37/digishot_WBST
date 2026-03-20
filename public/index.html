@@ -284,7 +284,6 @@ body {
 .nav-links a:hover { background: rgba(10,35,66,0.06); color: var(--navy); }
 
 .nav-actions { display: flex; align-items: center; gap: 0.75rem; margin-left: auto; }
-.mobile-only { display: none; }
 
 /* Hamburger menu button */
 .nav-hamburger {
@@ -312,9 +311,9 @@ body {
 .nav-hamburger.active span:nth-child(2) { opacity: 0; }
 .nav-hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-/* Mobile nav overlay */
-.nav-links.mobile-open {
-  display: flex !important;
+/* Mobile menu overlay */
+#mobile-menu {
+  display: none;
   flex-direction: column;
   position: fixed;
   top: 0;
@@ -330,13 +329,20 @@ body {
   overflow-y: auto;
   box-shadow: 0 8px 60px rgba(0,0,0,0.35);
 }
-.nav-links.mobile-open li { list-style: none; }
-.nav-links.mobile-open .mobile-only { display: list-item; }
-.nav-links.mobile-open a {
+#mobile-menu.open {
+  display: flex;
+}
+#mobile-menu a {
   font-size: 1.2rem;
   padding: 0.6rem 1.5rem;
   color: #0a2342;
   font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+#mobile-menu a:hover {
+  background: rgba(10,35,66,0.06);
 }
 
 .btn-outline-sm {
@@ -1478,7 +1484,6 @@ footer {
     <li><a href="#industries">Industries</a></li>
     <li><a href="/about">About Us</a></li>
     <li><a href="/blog">Blog</a></li>
-    <li class="mobile-only"><a href="/contact">Contact Us</a></li>
   </ul>
   <div class="nav-actions">
     <a href="/contact" class="btn-outline-sm">Contact Us</a>
@@ -1487,6 +1492,18 @@ footer {
     </button>
   </div>
 </nav>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu">
+  <a href="/pricing">Pricing</a>
+  <a href="#services">Services</a>
+  <a href="#why">Why Us</a>
+  <a href="#process">Process</a>
+  <a href="#industries">Industries</a>
+  <a href="/about">About Us</a>
+  <a href="/blog">Blog</a>
+  <a href="/contact">Contact Us</a>
+</div>
 
 <!-- HERO -->
 <main id="main-content">
@@ -2023,17 +2040,17 @@ footer {
 /* ── MOBILE HAMBURGER MENU ── */
 (function() {
   const btn = document.querySelector('.nav-hamburger');
-  const nav = document.querySelector('.nav-links');
-  if (!btn || !nav) return;
+  const menu = document.getElementById('mobile-menu');
+  if (!btn || !menu) return;
   btn.addEventListener('click', function() {
-    const open = nav.classList.toggle('mobile-open');
+    const open = menu.classList.toggle('open');
     btn.classList.toggle('active', open);
     btn.setAttribute('aria-expanded', open);
     document.body.style.overflow = open ? 'hidden' : '';
   });
-  nav.querySelectorAll('a').forEach(function(a) {
+  menu.querySelectorAll('a').forEach(function(a) {
     a.addEventListener('click', function() {
-      nav.classList.remove('mobile-open');
+      menu.classList.remove('open');
       btn.classList.remove('active');
       btn.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
